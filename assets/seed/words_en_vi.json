@@ -1,0 +1,62 @@
+[
+  {
+    "id": 1,
+    "term": "adapt",
+    "meaning": "thích nghi",
+    "example": "She adapts quickly to new tools."
+  },
+  {
+    "id": 2,
+    "term": "focus",
+    "meaning": "tập trung",
+    "example": "Try to focus for ten seconds."
+  },
+  {
+    "id": 3,
+    "term": "reward",
+    "meaning": "phần thưởng",
+    "example": "Small rewards keep motivation alive."
+  },
+  {
+    "id": 4,
+    "term": "habit",
+    "meaning": "thói quen",
+    "example": "One tiny habit can change your day."
+  },
+  {
+    "id": 5,
+    "term": "glance",
+    "meaning": "liếc nhìn",
+    "example": "Take a quick glance at the card."
+  },
+  {
+    "id": 6,
+    "term": "trigger",
+    "meaning": "kích hoạt",
+    "example": "A sound can trigger a memory."
+  },
+  {
+    "id": 7,
+    "term": "calm",
+    "meaning": "bình tĩnh",
+    "example": "A short breath helps you feel calm."
+  },
+  {
+    "id": 8,
+    "term": "instant",
+    "meaning": "tức thì",
+    "example": "The app gives instant feedback."
+  },
+  {
+    "id": 9,
+    "term": "repeat",
+    "meaning": "lặp lại",
+    "example": "Repeat exposure builds familiarity."
+  },
+  {
+    "id": 10,
+    "term": "nudge",
+    "meaning": "gợi nhắc nhẹ",
+    "example": "A nudge can bring users back."
+  }
+]
