@@ -62,3 +62,6 @@ captures/
 
 # Coverage
 coverage/
+
+# Golden test artifacts
+**/test/**/failures/
