@@ -65,6 +65,18 @@ class FakeBehaviorMetricsRepository extends BehaviorMetricsRepository {
   }
 
   @override
+  Future<double> getTodayAverageReactionMs(DateTime now) async {
+    return 0;
+  }
+
+  @override
+  Future<int> getFamiliarWordCount({double threshold = 0.6}) async {
+    return persistedStates.values
+        .where((item) => item.strength >= threshold)
+        .length;
+  }
+
+  @override
   Future<void> recordEncounter({
     required int wordId,
     required DateTime seenAt,

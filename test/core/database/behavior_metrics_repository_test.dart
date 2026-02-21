@@ -79,5 +79,61 @@ void main() {
       expect(countDay21, 1);
       expect(countDay22, 1);
     });
+
+    test('getRecentDailySessionCounts returns 7-day timeline', () async {
+      await repository.recordEncounter(
+        wordId: 1,
+        seenAt: DateTime(2026, 2, 20, 8),
+        reactionMs: 400,
+        strength: 0.3,
+        encounterCount: 1,
+        rewarded: false,
+      );
+      await repository.recordEncounter(
+        wordId: 2,
+        seenAt: DateTime(2026, 2, 21, 9),
+        reactionMs: 500,
+        strength: 0.35,
+        encounterCount: 1,
+        rewarded: false,
+      );
+
+      final stats = await repository.getRecentDailySessionCounts(
+        now: DateTime(2026, 2, 21, 10),
+        days: 7,
+      );
+
+      expect(stats, hasLength(7));
+      expect(stats.last.day, DateTime(2026, 2, 21));
+      expect(stats.last.count, 1);
+      expect(stats[5].day, DateTime(2026, 2, 20));
+      expect(stats[5].count, 1);
+    });
+
+    test('getWeakestWords sorts by strength ascending', () async {
+      await repository.recordEncounter(
+        wordId: 10,
+        seenAt: DateTime(2026, 2, 21, 9),
+        reactionMs: 700,
+        strength: 0.2,
+        encounterCount: 2,
+        rewarded: false,
+      );
+      await repository.recordEncounter(
+        wordId: 20,
+        seenAt: DateTime(2026, 2, 21, 9, 10),
+        reactionMs: 500,
+        strength: 0.5,
+        encounterCount: 1,
+        rewarded: false,
+      );
+
+      final weak = await repository.getWeakestWords(limit: 2);
+
+      expect(weak, hasLength(2));
+      expect(weak.first.wordId, 10);
+      expect(weak.first.strength, closeTo(0.2, 0.0001));
+      expect(weak.last.wordId, 20);
+    });
   });
 }

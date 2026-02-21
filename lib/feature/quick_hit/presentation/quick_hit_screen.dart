@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../feature/reward/presentation/reward_banner.dart';
 import '../../../shared/providers/app_providers.dart';
+import 'today_details_screen.dart';
 
 class QuickHitScreen extends ConsumerWidget {
   const QuickHitScreen({super.key});
@@ -16,6 +17,31 @@ class QuickHitScreen extends ConsumerWidget {
       return const Scaffold(body: Center(child: CircularProgressIndicator()));
     }
 
+    if (state.errorMessage != null) {
+      return Scaffold(
+        appBar: AppBar(title: const Text('Quick Hit')),
+        body: Center(
+          child: Padding(
+            padding: const EdgeInsets.all(24),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: <Widget>[
+                Text(
+                  state.errorMessage!,
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 16),
+                FilledButton(
+                  onPressed: controller.retry,
+                  child: const Text('Thử lại'),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+    }
+
     final word = state.currentWord;
     if (word == null) {
       return const Scaffold(body: Center(child: Text('No words available')));
@@ -25,6 +51,17 @@ class QuickHitScreen extends ConsumerWidget {
       appBar: AppBar(
         title: const Text('Quick Hit'),
         actions: <Widget>[
+          IconButton(
+            tooltip: 'Today details',
+            onPressed: () {
+              Navigator.of(context).push(
+                MaterialPageRoute<void>(
+                  builder: (_) => const TodayDetailsScreen(),
+                ),
+              );
+            },
+            icon: const Icon(Icons.insights_outlined),
+          ),
           Padding(
             padding: const EdgeInsets.only(right: 16),
             child: Center(child: Text('Sessions: ${state.sessionCount}')),
@@ -63,11 +100,38 @@ class QuickHitScreen extends ConsumerWidget {
                     ),
                   ),
                 ),
+                const SizedBox(height: 12),
+                Card(
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 12,
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: <Widget>[
+                        Expanded(
+                          child: Text(
+                            'Today avg: ${state.avgReactionMs.toStringAsFixed(0)}ms',
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            'Familiar: ${state.familiarWordsCount}',
+                            textAlign: TextAlign.end,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
                 const SizedBox(height: 20),
                 FilledButton(
-                  onPressed: state.showMeaning
-                      ? null
-                      : controller.revealMeaning,
+                  onPressed:
+                      state.showMeaning ? null : controller.revealMeaning,
                   child: const Text('Reveal meaning'),
                 ),
                 const SizedBox(height: 12),

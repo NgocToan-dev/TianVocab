@@ -35,6 +35,16 @@ class FakeBehaviorMetricsRepository extends BehaviorMetricsRepository {
   }
 
   @override
+  Future<double> getTodayAverageReactionMs(DateTime now) async {
+    return 0;
+  }
+
+  @override
+  Future<int> getFamiliarWordCount({double threshold = 0.6}) async {
+    return 0;
+  }
+
+  @override
   Future<void> recordEncounter({
     required int wordId,
     required DateTime seenAt,
@@ -55,9 +65,47 @@ class AlwaysRewardEngine extends RewardEngine {
 }
 
 void main() {
+  testWidgets('opens Today details from app bar icon', (tester) async {
+    await tester.binding.setSurfaceSize(const Size(390, 844));
+
+    final fakeBehaviorMetrics = FakeBehaviorMetricsRepository(todayCount: 0);
+    final fakeSeedWords = FakeSeedWordRepository(
+      <WordEntry>[
+        const WordEntry(
+          id: 1,
+          term: 'focus',
+          meaning: 'tập trung',
+          example: 'Focus for ten seconds.',
+        ),
+      ],
+    );
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: <Override>[
+          seedWordRepositoryProvider.overrideWithValue(fakeSeedWords),
+          behaviorMetricsRepositoryProvider.overrideWithValue(
+            fakeBehaviorMetrics,
+          ),
+        ],
+        child: const MaterialApp(home: QuickHitScreen()),
+      ),
+    );
+
+    await tester.pumpAndSettle();
+    await tester.tap(find.byIcon(Icons.insights_outlined));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 300));
+
+    expect(find.text('Today details'), findsOneWidget);
+    await tester.binding.setSurfaceSize(null);
+  });
+
   testWidgets('reveal/next flow updates UI and shows reward banner', (
     tester,
   ) async {
+    await tester.binding.setSurfaceSize(const Size(390, 844));
+
     final fakeBehaviorMetrics = FakeBehaviorMetricsRepository(todayCount: 0);
     final fakeSeedWords = FakeSeedWordRepository(
       <WordEntry>[
@@ -98,6 +146,7 @@ void main() {
       FilledButton,
       'Reveal meaning',
     );
+    await tester.ensureVisible(revealButtonFinder);
     final revealBeforeTap = tester.widget<FilledButton>(revealButtonFinder);
     expect(revealBeforeTap.onPressed, isNotNull);
 
@@ -118,5 +167,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Nice hit! +Dopamine'), findsNothing);
+
+    await tester.binding.setSurfaceSize(null);
   });
 }

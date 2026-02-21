@@ -41,6 +41,16 @@ class _SmokeMetricsRepo extends BehaviorMetricsRepository {
   }
 
   @override
+  Future<double> getTodayAverageReactionMs(DateTime now) async {
+    return 0;
+  }
+
+  @override
+  Future<int> getFamiliarWordCount({double threshold = 0.6}) async {
+    return 0;
+  }
+
+  @override
   Future<void> recordEncounter({
     required int wordId,
     required DateTime seenAt,

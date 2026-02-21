@@ -38,20 +38,43 @@ class QuickHitController extends StateNotifier<QuickHitState> {
   DateTime _shownAt = DateTime.now();
 
   Future<void> _bootstrap() async {
-    _pool = await _repository.loadWords();
+    state = state.copyWith(isLoading: true, errorMessage: null);
+    try {
+      _pool = await _repository.loadWords();
 
-    final persistedStates =
-        await _behaviorMetricsRepository.loadFamiliarityStates();
-    _states
-      ..clear()
-      ..addAll(persistedStates);
+      final persistedStates =
+          await _behaviorMetricsRepository.loadFamiliarityStates();
+      _states
+        ..clear()
+        ..addAll(persistedStates);
 
-    final todayCount = await _behaviorMetricsRepository.getTodaySessionCount(
-      DateTime.now(),
-    );
-    state = state.copyWith(sessionCount: todayCount);
+      final now = DateTime.now();
+      final todayCount = await _behaviorMetricsRepository.getTodaySessionCount(
+        now,
+      );
+      final todayAvgReactionMs =
+          await _behaviorMetricsRepository.getTodayAverageReactionMs(now);
+      final familiarWordsCount =
+          await _behaviorMetricsRepository.getFamiliarWordCount();
 
-    _pickNextWord(resetReward: true, incrementSessionCount: false);
+      state = state.copyWith(
+        sessionCount: todayCount,
+        avgReactionMs: todayAvgReactionMs,
+        familiarWordsCount: familiarWordsCount,
+      );
+
+      _pickNextWord(resetReward: true, incrementSessionCount: false);
+    } catch (_) {
+      state = state.copyWith(
+        isLoading: false,
+        currentWord: null,
+        errorMessage: 'Không thể tải dữ liệu. Hãy thử lại.',
+      );
+    }
+  }
+
+  void retry() {
+    _bootstrap();
   }
 
   void revealMeaning() {
@@ -62,11 +85,11 @@ class QuickHitController extends StateNotifier<QuickHitState> {
     final currentWord = state.currentWord;
     var encounteredStrength = 0.2;
     var encounteredCount = 1;
+    var reactionMs = 0;
 
     if (currentWord != null) {
       final now = DateTime.now();
-      final reactionMs =
-          now.difference(_shownAt).inMilliseconds.clamp(100, 5000);
+      reactionMs = now.difference(_shownAt).inMilliseconds.clamp(100, 5000);
       final previous = _states[currentWord.id];
       final decayed = previous == null
           ? 0.2
@@ -108,6 +131,19 @@ class QuickHitController extends StateNotifier<QuickHitState> {
       );
     }
 
+    final previousCount = state.sessionCount;
+    final previousAvg = state.avgReactionMs;
+    if (reactionMs > 0) {
+      final nextCount = previousCount + 1;
+      final nextAvg = ((previousAvg * previousCount) + reactionMs) / nextCount;
+      final familiarWordsCount =
+          _states.values.where((item) => item.strength >= 0.6).length;
+      state = state.copyWith(
+        avgReactionMs: nextAvg,
+        familiarWordsCount: familiarWordsCount,
+      );
+    }
+
     _pickNextWord();
   }
 
@@ -138,6 +174,7 @@ class QuickHitController extends StateNotifier<QuickHitState> {
       showMeaning: false,
       showReward: shouldReward,
       sessionCount: nextSessionCount,
+      errorMessage: null,
     );
   }
 }
